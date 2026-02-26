@@ -62,9 +62,17 @@ The MVP proves the core thesis: **dual-track generation (code + tests) with auto
 - User can review/edit the plan before execution
 - Each task becomes an agent assignment
 
+**Codebase Grounding (before agents start)**
+- Spawn a grounding agent that explores the project codebase
+- Agent reads project structure, existing tests, conventions, CLAUDE.md
+- Produces a grounding report: framework, styling, state management, relevant files, test patterns
+- This report is included as context for all code agents
+- Follows Willison's "First Run the Tests" pattern — agents that understand the project first produce better code
+
 **Code Agent Prompts**
 - Template-based prompts that include:
   - The specific task description
+  - The grounding report (codebase conventions, relevant files)
   - Reference to approved mockup (description, not image — Claude Code is CLI)
   - Project context (framework, conventions from CLAUDE.md)
   - Constraint: only modify files relevant to the task
@@ -88,10 +96,22 @@ The MVP proves the core thesis: **dual-track generation (code + tests) with auto
 
 ### Phase 4: Convergence Engine (Weeks 8-11)
 
+**Baseline + Red Check**
+- Run existing project test suite before agents start → record baseline
+- After test agents complete, run generated `.sigma` tests against CURRENT code (pre-changes)
+- Verify all generated tests FAIL (red phase) — if any pass, they're vacuous and get flagged
+- This enforces Willison's red/green TDD: "confirm tests fail before implementing"
+
 **Integration Merge**
 - Merge all code agent worktrees into integration branch
 - Detect and report merge conflicts
 - If conflicts: spawn a fix agent to resolve, or flag for human
+
+**Regression Check**
+- Run existing project tests against integration branch
+- Compare results to baseline — any new failures are regressions
+- Regressions get their own fix agents before proceeding to BT tests
+- This ensures agents don't break existing functionality
 
 **BT Test Execution**
 - Embed `bt-runner` (from behaviour-tree-ecosystem)
@@ -115,9 +135,16 @@ The MVP proves the core thesis: **dual-track generation (code + tests) with auto
 - Track iteration count and test pass rate over time
 - Stop after max iterations (default 5) or full convergence
 
+**Change Walkthrough Generation**
+- After convergence (all tests pass), spawn a walkthrough agent
+- Agent reads all diffs, test results, and original requirement
+- Produces a narrative summary: what was built, why, how it connects
+- This is the first thing the human reads in the review step
+- Follows Willison's "Linear Walkthroughs" pattern
+
 **Convergence Dashboard**
 - Timeline showing pass rate per iteration
-- Per-test status breakdown
+- Per-test status breakdown (including red-check and regression results)
 - Visual comparison score per iteration
 - Current iteration indicator
 - Manual "stop" and "add instruction" controls
@@ -125,11 +152,12 @@ The MVP proves the core thesis: **dual-track generation (code + tests) with auto
 ### Phase 5: Review & Merge (Weeks 11-13)
 
 **Review Package**
+- **Change walkthrough** (narrative summary — read first)
 - Side-by-side: approved mockup vs implementation screenshot
 - Visual similarity score
-- Test results summary (X/Y passing)
+- Test results summary (X/Y new tests passing + Y/Y existing tests passing)
 - Full git diff (all changes across all agent worktrees)
-- Convergence history (how many iterations, what was fixed)
+- Convergence history (how many iterations, what was fixed, regressions caught)
 
 **Sigma Authoring Integration**
 - Embed sigma-authoring component for test review
@@ -231,28 +259,46 @@ The MVP proves the core thesis: **dual-track generation (code + tests) with auto
 
    User reviews, approves. (Can edit tasks if needed.)
 
-4. GENERATE
+4. GROUND + GENERATE
+   Baseline: 47/47 existing project tests pass ✓ (recorded)
+   Grounding agent explores codebase → reports: Next.js 14, Tailwind, Zustand, etc.
+
    Agent monitor shows 10 agents spinning up (6 code + 4 test)
+   All code agents receive the grounding report as context
    Each agent card shows live output
    Agents complete over 2-8 minutes
-   Dashboard: "All agents complete. Starting convergence."
+
+   Red check: all 14 generated tests fail against current code ✓ (all red)
+   Dashboard: "All agents complete. Tests verified. Starting convergence."
 
 5. CONVERGE
-   Iteration 1: 8/14 tests pass, visual score 72%
-   Failures: nav link missing, dark mode doesn't persist, avatar upload 404
-   3 fix agents dispatched
+   Iteration 1:
+     Regression check: 47/47 existing tests still pass ✓
+     BT tests: 8/14 pass, visual score 72%
+     Failures: nav link missing, dark mode doesn't persist, avatar upload 404
+     3 fix agents dispatched
 
-   Iteration 2: 12/14 tests pass, visual score 88%
-   Failures: notification toggles don't save state
-   1 fix agent dispatched
+   Iteration 2:
+     Regression check: 47/47 still pass ✓
+     BT tests: 12/14 pass, visual score 88%
+     Failures: notification toggles don't save state
+     1 fix agent dispatched
 
-   Iteration 3: 14/14 tests pass, visual score 93%
-   CONVERGED ✓
+   Iteration 3:
+     Regression check: 47/47 still pass ✓
+     BT tests: 14/14 pass, visual score 93%
+     CONVERGED ✓
+
+   Walkthrough agent generates summary:
+   "Added a Settings page at /settings with three tabbed sections..."
 
 6. REVIEW
-   User sees:
+   User reads the change walkthrough first — understands what was built in 30 seconds.
+
+   Then sees:
    - Mockup vs screenshot side-by-side (93% match)
-   - 14/14 tests passing
+   - 14/14 new tests passing
+   - 47/47 existing tests passing (no regressions)
    - 18 files changed, +580 -12 lines
    - 3 convergence iterations
 
@@ -290,8 +336,11 @@ The MVP is complete when a user can:
 - [ ] Open a React/Next.js project in Converge
 - [ ] Describe a feature and get visual mockups
 - [ ] Approve a mockup and see a task plan
+- [ ] See agents grounded in their codebase before coding starts
 - [ ] Watch parallel code and test agents execute
-- [ ] See the convergence loop run automatically
+- [ ] See red-phase verification (generated tests fail before code changes)
+- [ ] See the convergence loop run automatically (with regression checks)
+- [ ] Read a narrative walkthrough explaining what was built
 - [ ] View test results, visual comparison, and code diff
 - [ ] Edit generated tests and trigger re-convergence
 - [ ] Merge approved changes to their branch
@@ -300,4 +349,7 @@ The MVP is complete when a user can:
 And we can demonstrate:
 - [ ] A non-trivial feature (multi-component, API + UI) built end-to-end
 - [ ] Convergence achieving all-tests-pass within 5 iterations
+- [ ] Red-phase verification catching at least one vacuous test
+- [ ] Regression check catching at least one case where agents break existing functionality
+- [ ] Change walkthrough accurately summarizing what was built
 - [ ] At least one case where the convergence loop catches a real bug that code-only generation would miss

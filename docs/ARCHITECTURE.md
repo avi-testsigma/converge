@@ -69,8 +69,9 @@ The UI is a single Electron renderer with multiple views:
 - Controls: pause, resume, terminate, add instruction
 
 #### Review & Merge View
+- **Change walkthrough**: narrative summary of what was built and why (read this first)
 - Side-by-side: approved mockup vs implementation screenshot
-- Test results summary with drill-down
+- Test results summary with drill-down (new tests + regression check)
 - Git diff viewer for all code changes
 - One-click merge to target branch
 - Rejection workflow: add feedback, trigger new iteration
@@ -117,7 +118,8 @@ interface OrchestratorEngine {
 
 ```
 IDLE → ENVISIONING → VISION_APPROVED → DECOMPOSING →
-GENERATING → CONVERGING → READY_FOR_REVIEW →
+GROUNDING → GENERATING → RED_CHECK → CONVERGING →
+WALKTHROUGH → READY_FOR_REVIEW →
   ├→ APPROVED → MERGED
   └→ REJECTED → GENERATING (with feedback)
 ```
@@ -158,10 +160,17 @@ interface AgentConfig {
 
 | Type | Purpose | Input | Output |
 |------|---------|-------|--------|
-| `code` | Implement a feature/component | Task description + approved mockup ref | Code changes in worktree |
+| `ground` | Explore codebase before coding | Project dir + task context | Codebase summary, relevant files, conventions |
+| `code` | Implement a feature/component | Task description + grounding report + approved mockup ref | Code changes in worktree |
 | `test` | Generate acceptance tests | Requirement + approved mockup ref | `.sigma` BT files in worktree |
 | `fix` | Fix a specific test failure | Failing test + diagnostic report | Targeted code fix in worktree |
+| `fix-regression` | Fix a broken existing test | Regression report + baseline | Targeted code fix that restores existing behavior |
 | `diagnose` | Analyze test failure | BT event stream + screenshots | Diagnostic report |
+| `walkthrough` | Explain what was built | All diffs + test results + requirement | Narrative change summary |
+
+The `ground` agent runs first — it explores the codebase, reads existing tests, identifies conventions and relevant files, then produces a grounding report that code agents receive as context. This follows Simon Willison's "First Run the Tests" pattern: agents that understand the project before modifying it produce significantly better results.
+
+The `walkthrough` agent runs after convergence — it reads all diffs, test results, and the original requirement, then produces a narrative explanation of what was built. This follows Willison's "Linear Walkthroughs" pattern: a structured human-readable summary that makes review faster and more meaningful than reading raw diffs.
 
 **How Agents Are Spawned:**
 
@@ -277,7 +286,15 @@ interface ConvergenceConfig {
 
 // Event stream for UI updates
 type ConvergenceEvent =
+  | { type: 'baseline_running' }
+  | { type: 'baseline_complete'; existingTests: number; passing: number; failing: number }
+  | { type: 'baseline_warning'; preExistingFailures: string[] }
+  | { type: 'red_check_running'; total: number }
+  | { type: 'red_check_result'; testId: string; status: 'red' | 'vacuous' }
+  | { type: 'vacuous_test'; testId: string; reason: string }
   | { type: 'iteration_start'; iteration: number }
+  | { type: 'regression_check'; total: number }
+  | { type: 'regression_detected'; brokenTests: string[] }
   | { type: 'tests_running'; total: number }
   | { type: 'test_result'; testId: string; status: 'pass' | 'fail'; details: BTEventLog }
   | { type: 'visual_check'; score: number; discrepancies: Discrepancy[] }
@@ -285,6 +302,8 @@ type ConvergenceEvent =
   | { type: 'fix_dispatched'; agentId: string; target: string }
   | { type: 'fix_complete'; agentId: string }
   | { type: 'iteration_end'; passRate: number; visualScore: number }
+  | { type: 'walkthrough_generating' }
+  | { type: 'walkthrough_complete'; summary: string }
   | { type: 'converged'; finalPassRate: number; finalVisualScore: number }
   | { type: 'max_iterations_reached'; passRate: number }
 ```
@@ -293,6 +312,21 @@ type ConvergenceEvent =
 
 ```
 function converge(config):
+
+  // Phase 0: BASELINE — Run existing project tests
+  baselineResults = runExistingTests(config.projectDir)
+  if baselineResults.failures:
+    emit('baseline_warning', baselineResults)
+    // Record which tests already fail — don't blame agents for these
+
+  // Phase 0.5: RED CHECK — Verify generated tests fail without new code
+  redCheckResults = btRunner.executeAll(config.testFiles, config.baseBranch)
+  for test in redCheckResults:
+    if test.status == 'pass':
+      emit('vacuous_test', test.testId)
+      // Flag: this test passes without any code changes — it tests nothing
+      // Either remove it or have test agent rewrite with stricter assertions
+
   for iteration in 1..maxIterations:
 
     // 1. Merge all code changes into integration branch
@@ -301,29 +335,40 @@ function converge(config):
       spawnFixAgent(resolveConflicts, mergeResult.conflicts)
       continue
 
-    // 2. Run behavior tree test suite
+    // 2. Run existing test suite (regression check)
+    regressionResults = runExistingTests(integrationBranch)
+    newRegressions = diff(regressionResults, baselineResults)
+    if newRegressions.length > 0:
+      emit('regression_detected', newRegressions)
+      for regression in newRegressions:
+        spawnFixAgent('regression', regression, codeWorktree)
+      continue
+
+    // 3. Run behavior tree test suite
     testResults = btRunner.executeAll(config.testFiles, integrationBranch)
 
-    // 3. Visual verification (if mockup provided)
+    // 4. Visual verification (if mockup provided)
     screenshot = takeScreenshot(integrationBranch)
     visualResult = visionService.compareImplementation(config.mockup, screenshot)
 
-    // 4. Check convergence
+    // 5. Check convergence
     passRate = testResults.passed / testResults.total
     if passRate == 1.0 && visualResult.score >= 90:
-      return CONVERGED
+      // Generate change walkthrough before declaring converged
+      walkthrough = generateWalkthrough(config.allDiffs, testResults)
+      return CONVERGED(walkthrough)
 
-    // 5. Diagnose failures
+    // 6. Diagnose failures
     for failure in testResults.failures:
       diagnostic = diagnoseFailure(failure.eventLog, failure.screenshots)
 
-      // 6. Dispatch targeted fix agent
+      // 7. Dispatch targeted fix agent
       if diagnostic.isCodeBug:
         spawnFixAgent('code', diagnostic.suggestedFix, codeWorktree)
       else if diagnostic.isTestBug:
         spawnFixAgent('test', diagnostic.suggestedFix, testWorktree)
 
-    // 7. Wait for fix agents to complete
+    // 8. Wait for fix agents to complete
     awaitAll(activeFixAgents)
 
   return MAX_ITERATIONS_REACHED(passRate)
@@ -390,14 +435,34 @@ User: "Add a settings page with dark mode toggle and notification preferences"
   │       ├── test-task-1: "Acceptance tests for settings page"
   │       └── test-task-2: "Acceptance tests for dark mode behavior"
   │
+  ├─→ Baseline: Run existing tests
+  │     Input: project's existing test suite
+  │     Output: 47/47 existing tests pass ✓ (baseline recorded)
+  │
+  ├─→ Grounding Agent: Explore codebase
+  │     Input: project directory + task plan
+  │     Output: grounding report
+  │       ├── Framework: Next.js 14 with App Router
+  │       ├── Styling: Tailwind + shadcn/ui
+  │       ├── State: Zustand stores in src/stores/
+  │       ├── API: Route handlers in src/app/api/
+  │       ├── Relevant files: layout.tsx, nav.tsx, theme-provider.tsx
+  │       └── Existing tests: Vitest in __tests__/, 47 passing
+  │
   ├─→ Agent Manager: Spawn (parallel)
   │     ├── code-agent-1 → worktree/code-1/ (settings component)
   │     ├── code-agent-2 → worktree/code-2/ (API endpoint)
   │     ├── code-agent-3 → worktree/code-3/ (theme provider)
   │     ├── test-agent-1 → worktree/test-1/ (generates settings.sigma)
   │     └── test-agent-2 → worktree/test-2/ (generates dark-mode.sigma)
+  │     (All code agents receive the grounding report as context)
   │
   │     All agents complete...
+  │
+  ├─→ Red Check: Verify generated tests fail against current code
+  │     Run settings.sigma against base branch → 0/6 pass ✓ (all red)
+  │     Run dark-mode.sigma against base branch → 0/4 pass ✓ (all red)
+  │     All tests properly fail without new code — they test real things
   │
   ├─→ Convergence Engine: Loop
   │     Iteration 1:
@@ -422,9 +487,21 @@ User: "Add a settings page with dark mode toggle and notification preferences"
   │       Visual score: 94% ✓
   │       CONVERGED
   │
+  ├─→ Walkthrough Agent: Explain what was built
+  │     Input: all diffs + test results + original requirement
+  │     Output: narrative summary
+  │       "Added a Settings page at /settings with three tabbed sections:
+  │        Profile (name, email, avatar upload via presigned S3 URL),
+  │        Notifications (email + push toggles persisted via PUT /api/settings),
+  │        and Appearance (dark mode toggle using existing ThemeProvider).
+  │        Nav bar updated with Settings link. 10 acceptance tests cover
+  │        all sections including persistence across page refresh."
+  │
   └─→ Review Package
+        ├── Change walkthrough (narrative summary above)
         ├── Mockup vs screenshot comparison (94% match)
         ├── 10/10 behavior tree tests passing
+        ├── 47/47 existing tests still passing (no regressions)
         ├── Git diff: 12 files changed, +340 -20
         ├── Convergence: 3 iterations
         └── Human approves → merged to main
@@ -496,10 +573,13 @@ testsigma-converge/
 │   │   │   │   ├── claude-code.ts     # Claude Code subprocess wrapper
 │   │   │   │   ├── codex.ts           # Codex subprocess wrapper (future)
 │   │   │   │   └── prompt-templates/  # Task-specific prompt templates
+│   │   │   │       ├── ground-agent.md
 │   │   │   │       ├── code-agent.md
 │   │   │   │       ├── test-agent.md
 │   │   │   │       ├── fix-agent.md
-│   │   │   │       └── diagnose-agent.md
+│   │   │   │       ├── fix-regression-agent.md
+│   │   │   │       ├── diagnose-agent.md
+│   │   │   │       └── walkthrough-agent.md
 │   │   │   ├── convergence/
 │   │   │   │   ├── engine.ts          # ConvergenceEngine
 │   │   │   │   ├── diagnostics.ts     # Failure analysis

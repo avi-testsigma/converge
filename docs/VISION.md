@@ -60,6 +60,15 @@ Requirement → Visual Prototype → Approve →
 ### Test-First Orchestration
 Tests are generated from the requirement, not from the code. Tests are the specification. Code agents are scored by how many tests they pass. This is TDD at the orchestration level.
 
+This directly implements Simon Willison's "Red/Green TDD" agentic pattern at the system level. Willison observes that red/green TDD mitigates two critical risks with coding agents: **non-functional code** (agents write code that doesn't work) and **unnecessary code** (agents build features that never get used). By generating tests from the requirement — not from the implementation — we catch both failure modes automatically.
+
+Critically, we enforce the **red phase**: generated tests are run against the current codebase BEFORE code agents begin work. If tests already pass without new code, they are vacuous and get flagged. This ensures every generated test actually verifies something new.
+
+### Regression Safety
+Before any agent work begins, the project's existing test suite runs to establish a baseline. After convergence, existing tests run again to verify nothing was broken. This follows Willison's "First Run the Tests" pattern — it grounds the system in the project's current state and prevents regressions.
+
+As Willison notes, agents are "already biased towards testing" — an existing test suite reinforces this behavior and helps agents understand the codebase through its tests.
+
 ### Living Documentation
 The `.sigma` behavior tree files serve triple duty:
 - **For QA**: Executable automated tests
@@ -68,15 +77,24 @@ The `.sigma` behavior tree files serve triple duty:
 
 One artifact, three audiences. The test suite IS the documentation.
 
+### Change Walkthroughs
+After convergence, the system generates a narrative walkthrough of what was built — not just diffs and test results, but a human-readable explanation of the changes, why they were made, and how they connect. Inspired by Willison's "Linear Walkthroughs" pattern, this makes the review step faster and more meaningful. The developer reads a story, not a pile of diffs.
+
 ### Cascading Confidence
 Multiple verification layers filter issues before human review:
-- **Level 1**: Lint + typecheck (syntax correctness)
-- **Level 2**: Unit tests (logic correctness)
-- **Level 3**: Behavior tree tests (functional correctness)
-- **Level 4**: Visual verification (design correctness)
-- **Level 5**: Human review (intent correctness)
+- **Level 0**: Existing test suite baseline (regression safety)
+- **Level 1**: Red-phase check (test validity — tests must fail before code)
+- **Level 2**: Lint + typecheck (syntax correctness)
+- **Level 3**: Unit tests (logic correctness)
+- **Level 4**: Behavior tree tests (functional correctness)
+- **Level 5**: Visual verification (design correctness)
+- **Level 6**: Change walkthrough (comprehension aid)
+- **Level 7**: Human review (intent correctness)
 
-Each level catches a class of problems so the human only deals with high-level intent questions.
+Each level catches a class of problems so the human only deals with high-level intent questions. As Willison puts it: "writing code is cheap now" — but good code (correct, tested, maintainable) is still expensive. Cascading confidence automates the expensive parts.
+
+### Code is Cheap, Verification is Valuable
+Willison's central observation — that AI has made code production nearly free while quality remains expensive — is the economic foundation for Converge. If code is cheap, the bottleneck shifts to verification. Converge invests the compute budget in verification layers (tests, visual checks, walkthroughs) rather than more code generation. This is the opposite of tools that optimize for generating more code faster.
 
 ### Local-First
 Everything runs on the user's machine. Their repos, their API keys, their privacy. No cloud dependency for core functionality. Fast iteration without network latency.
