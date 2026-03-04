@@ -96,6 +96,7 @@ pnpm test                 # Run all tests
 - [Storybook Integration](docs/STORYBOOK_INTEGRATION.md) — Addon design, story ↔ BT bridge
 - [VS Code Extension](docs/VSCODE_EXTENSION.md) — Extension surfaces, desktop app connection
 - [Claude Plugins](docs/CLAUDE_PLUGINS.md) — Skills, sub-agents, MCP tools
+- [Intelligent QA](docs/INTELLIGENT_QA.md) — Quality intelligence layer, continuous quality, learning
 
 ## Status
 

@@ -483,6 +483,98 @@
     .m-sky { background: var(--sky); }
     .m-green { background: #34d399; }
 
+    /* Three Acts */
+    .three-acts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .act-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .act-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+
+    .act-card.act-build::before { background: var(--purple); }
+    .act-card.act-guard::before { background: var(--coral); }
+    .act-card.act-learn::before { background: var(--mint); }
+
+    .act-card .act-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.5rem;
+    }
+
+    .act-card.act-build .act-label { color: var(--purple); }
+    .act-card.act-guard .act-label { color: var(--coral); }
+    .act-card.act-learn .act-label { color: #059669; }
+
+    .act-card h3 { font-size: 1rem; margin-bottom: 0.35rem; }
+    .act-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.55; }
+
+    .act-card ul {
+      list-style: none;
+      margin-top: 0.75rem;
+    }
+
+    .act-card ul li {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      padding: 0.25rem 0;
+      padding-left: 1.1rem;
+      position: relative;
+    }
+
+    .act-card ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.6rem;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .act-card.act-build ul li::before { background: var(--purple-light); border: 2px solid var(--purple); }
+    .act-card.act-guard ul li::before { background: var(--coral-light); border: 2px solid var(--coral); }
+    .act-card.act-learn ul li::before { background: var(--mint-light); border: 2px solid #059669; }
+
+    .act-connector {
+      text-align: center;
+      margin-top: 1.25rem;
+      padding: 1rem;
+      background: var(--bg-card);
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+    }
+
+    .act-connector p {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 900px) {
+      .three-acts { grid-template-columns: 1fr; }
+    }
+
     /* Cascade */
     .cascade {
       display: flex;
@@ -722,8 +814,8 @@
   <ul class="nav-links">
     <li><a href="#spectrum">The Spectrum</a></li>
     <li><a href="#how">How It Works</a></li>
+    <li><a href="#acts">Three Acts</a></li>
     <li><a href="#confidence">Confidence</a></li>
-    <li><a href="#leverage">Assets</a></li>
     <li><a href="https://github.com/avi-testsigma/converge">GitHub</a></li>
   </ul>
 </nav>
@@ -736,7 +828,7 @@
     <span class="hl">Converge proves it works.</span>
   </h1>
   <p class="tagline">
-    Generate code and tests in parallel — from the same requirement. Automated convergence replaces manual review. Ship with confidence, not hope.
+    Generate code and tests in parallel — from the same requirement. Converge them automatically. Then keep proving it — through deployment, in production, getting smarter every cycle.
   </p>
 </section>
 
@@ -924,7 +1016,57 @@
   </div>
 </section>
 
-<!-- 6: Cascading Confidence -->
+<!-- 6: Three Acts of Quality -->
+<section id="acts">
+  <h2>Quality <span class="hl">Doesn't End</span> at Merge</h2>
+  <p class="subtitle">
+    The convergence loop is Act 1. Two more acts extend Converge into a platform that guards continuously and gets smarter over time.
+  </p>
+
+  <div class="three-acts">
+    <div class="act-card act-build">
+      <div class="act-label">Act 1: Build</div>
+      <h3>Development Time</h3>
+      <p>The convergence loop — generate code + tests, verify, fix, ship.</p>
+      <ul>
+        <li>Risk-informed test generation</li>
+        <li>Coverage-aware decomposition</li>
+        <li>Budget-aware execution</li>
+        <li>Visual + functional verification</li>
+      </ul>
+    </div>
+
+    <div class="act-card act-guard">
+      <div class="act-label">Act 2: Guard</div>
+      <h3>Post-Merge</h3>
+      <p>Continuous monitoring. Release gating. Production feedback loops.</p>
+      <ul>
+        <li>Composite release confidence scores</li>
+        <li>Anomaly detection in production</li>
+        <li>Incident-to-test pipeline</li>
+        <li>Gradual rollout support</li>
+      </ul>
+    </div>
+
+    <div class="act-card act-learn">
+      <div class="act-label">Act 3: Learn</div>
+      <h3>Continuous</h3>
+      <p>Every outcome refines models. Every interaction makes the system smarter.</p>
+      <ul>
+        <li>Risk model recalibration</li>
+        <li>Test generation improvement</li>
+        <li>False positive reduction</li>
+        <li>Coverage gap analysis</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="act-connector">
+    <p>Build → Guard → Learn → Build. Each cycle compounds. The platform gets better at finding real bugs, reducing noise, and focusing effort where it matters.</p>
+  </div>
+</section>
+
+<!-- 7: Cascading Confidence -->
 <section id="confidence">
   <h2><span class="hl">Cascading</span> Confidence</h2>
   <p class="subtitle">
@@ -988,9 +1130,10 @@
         <th>Tool</th>
         <th>Parallel Agents</th>
         <th>Auto Tests</th>
-        <th>Visual Mockups</th>
         <th>Convergence</th>
-        <th>Regression Safety</th>
+        <th>Risk Intelligence</th>
+        <th>Self-Healing</th>
+        <th>Learns</th>
       </tr>
     </thead>
     <tbody>
@@ -1001,28 +1144,32 @@
         <td class="no">&#x2015;</td>
         <td class="no">&#x2015;</td>
         <td class="no">&#x2015;</td>
+        <td class="no">&#x2015;</td>
       </tr>
       <tr>
-        <td>Conductor / Claude Squad</td>
+        <td>Conductor / Squad</td>
         <td class="yes">&#x2713;</td>
         <td class="no">&#x2015;</td>
         <td class="no">&#x2015;</td>
         <td class="no">&#x2015;</td>
         <td class="no">&#x2015;</td>
-      </tr>
-      <tr>
-        <td>Cursor / Windsurf</td>
-        <td class="no">&#x2015;</td>
-        <td class="no">&#x2015;</td>
-        <td class="no">&#x2015;</td>
-        <td class="no">&#x2015;</td>
         <td class="no">&#x2015;</td>
       </tr>
       <tr>
-        <td>Testsigma / Playwright</td>
+        <td>Testim / Mabl</td>
         <td class="no">&#x2015;</td>
         <td class="yes">&#x2713;</td>
         <td class="no">&#x2015;</td>
+        <td class="no">&#x2015;</td>
+        <td class="yes">&#x2713;</td>
+        <td class="no">&#x2015;</td>
+      </tr>
+      <tr>
+        <td>Launchable</td>
+        <td class="no">&#x2015;</td>
+        <td class="no">&#x2015;</td>
+        <td class="no">&#x2015;</td>
+        <td class="yes">&#x2713;</td>
         <td class="no">&#x2015;</td>
         <td class="yes">&#x2713;</td>
       </tr>
@@ -1033,9 +1180,14 @@
         <td class="yes">&#x2713;</td>
         <td class="yes">&#x2713;</td>
         <td class="yes">&#x2713;</td>
+        <td class="yes">&#x2713;</td>
       </tr>
     </tbody>
   </table>
+
+  <div class="insight" style="margin-top: 1.5rem;">
+    <p>Existing tools are point solutions — locator healing here, test selection there. Converge is the closed-loop system that connects code changes, test results, production signals, and risk models into a single feedback loop.</p>
+  </div>
 </section>
 
 <!-- 8: What We Leverage -->
@@ -1097,24 +1249,34 @@
 
   <div class="roadmap-grid">
     <div class="roadmap-card">
-      <span class="icon">&#x1F3AF;</span>
-      <h3>Competitive Agents</h3>
-      <p>Multiple implementations of the same task. Test suite picks the winner.</p>
+      <span class="icon">&#x1F9E0;</span>
+      <h3>Risk Intelligence</h3>
+      <p>Code complexity + defect history + change frequency = risk scores that focus testing where it matters most.</p>
     </div>
     <div class="roadmap-card">
-      <span class="icon">&#x1F3AC;</span>
-      <h3>Spec Recording</h3>
-      <p>Walk through a workflow in the browser. The recording becomes the acceptance test.</p>
+      <span class="icon">&#x1F6E1;&#xFE0F;</span>
+      <h3>Self-Healing Tests</h3>
+      <p>Semantic self-healing via intent-encoded .sigma trees. Re-derive steps when flows change, not just re-find elements.</p>
     </div>
     <div class="roadmap-card">
-      <span class="icon">&#x1F91D;</span>
-      <h3>Team Collaboration</h3>
-      <p>Shared agent pools, visual specs, and collaborative test review.</p>
+      <span class="icon">&#x1F6A6;</span>
+      <h3>Release Gating</h3>
+      <p>Composite confidence scores with reasoning — not binary pass/fail. "Safe to ship" with an explanation.</p>
+    </div>
+    <div class="roadmap-card">
+      <span class="icon">&#x1F4E1;</span>
+      <h3>Production Monitoring</h3>
+      <p>Anomaly detection post-deploy. Every production incident automatically becomes a regression test.</p>
     </div>
     <div class="roadmap-card">
       <span class="icon">&#x1F504;</span>
-      <h3>CI/CD Integration</h3>
-      <p>Generated tests become the regression suite. Converge runs in the pipeline.</p>
+      <h3>Learning Engine</h3>
+      <p>Risk models recalibrate after each release. Test generation improves. False positives decrease. The system compounds.</p>
+    </div>
+    <div class="roadmap-card">
+      <span class="icon">&#x1F3AF;</span>
+      <h3>Competitive Agents</h3>
+      <p>Multiple implementations of the same task. Test suite picks the winner.</p>
     </div>
   </div>
 </section>
@@ -1139,8 +1301,8 @@
     <a href="CLAUDE_PLUGINS.md" class="cta-secondary">
       Claude Plugins
     </a>
-    <a href="STORYBOOK_INTEGRATION.md" class="cta-secondary">
-      Storybook
+    <a href="INTELLIGENT_QA.md" class="cta-secondary">
+      Intelligent QA
     </a>
   </div>
 </section>

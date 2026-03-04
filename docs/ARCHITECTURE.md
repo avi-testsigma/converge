@@ -167,6 +167,10 @@ interface AgentConfig {
 | `fix-regression` | Fix a broken existing test | Regression report + baseline | Targeted code fix that restores existing behavior |
 | `diagnose` | Analyze test failure | BT event stream + screenshots | Diagnostic report |
 | `walkthrough` | Explain what was built | All diffs + test results + requirement | Narrative change summary |
+| `risk` | Compute risk scores from code analysis + defect history | Project dir + git log + defect data | Risk scores per component |
+| `monitor` | Watch production metrics, detect anomalies | APM webhooks + error logs | Anomaly alerts + regression test stubs |
+| `triage` | Deduplicate defects, score severity, assign owners | Raw diagnostic reports | Grouped, prioritized defect list |
+| `heal` | Self-heal broken tests (locator, timing, data issues) | Failed test + failure classification | Updated test with healing applied |
 
 The `ground` agent runs first — it explores the codebase, reads existing tests, identifies conventions and relevant files, then produces a grounding report that code agents receive as context. This follows Simon Willison's "First Run the Tests" pattern: agents that understand the project before modifying it produce significantly better results.
 
@@ -752,6 +756,75 @@ converge/
 - **Event streaming**: Direct access to NodeEventEmitter for real-time diagnostics
 - **Control**: Can pause, resume, modify tests mid-execution
 - **Isolation**: Each convergence iteration gets a fresh browser context
+
+### 7. Intelligence Layer (Post-MVP)
+
+The Intelligence Layer sits between `@converge/core` and the surfaces. It provides risk scoring, coverage analysis, and learning capabilities that make every surface smarter. See [INTELLIGENT_QA.md](INTELLIGENT_QA.md) for the full design.
+
+```typescript
+interface IntelligenceEngine {
+  // Risk analysis
+  computeRiskScores(projectDir: string): Promise<RiskMap>
+  getRiskForFiles(files: string[]): Promise<RiskScore[]>
+
+  // Coverage intelligence
+  getCoverageMap(projectDir: string): Promise<CoverageMap>
+  getUncoveredPaths(): Promise<CodePath[]>
+
+  // Test prioritization
+  prioritizeTests(tests: string[], budget?: number): Promise<PrioritizedTestPlan>
+
+  // Learning
+  recordOutcome(sessionId: string, outcome: SessionOutcome): Promise<void>
+  getFalsePositiveRate(): Promise<number>
+  getDefectPatterns(): Promise<DefectPattern[]>
+}
+
+interface RiskScore {
+  path: string
+  score: number              // 0-100
+  factors: {
+    complexity: number       // Cyclomatic complexity
+    changeFrequency: number  // Commits in last 90 days
+    defectDensity: number    // Historical bugs per KLOC
+    businessCriticality: number  // From config
+    dependencyDepth: number  // How many things depend on this
+  }
+}
+
+interface ReleaseAssessment {
+  verdict: 'safe' | 'acceptable_risk' | 'risky' | 'stop'
+  confidence: number
+  factors: {
+    coverageAchieved: number
+    riskScore: number
+    defects: { critical: number; high: number; medium: number; low: number }
+    regressionStatus: 'clean' | 'minor' | 'major'
+    visualMatchScore: number
+  }
+  reasoning: string
+  recommendation: string
+}
+```
+
+**Extended Dependency Graph (with Intelligence):**
+
+```
+                    @converge/shared
+                   (types, events, constants)
+                    /     |     \      \
+                   /      |      \      \
+          @converge/  @converge/  @converge/  @converge/
+          git         vision      bt-bridge   intelligence
+            \           |           /     \        |
+             \          |          /       \       |
+              @converge/core ─────────────────────┘
+         (orchestrator, convergence,
+          agent management)
+           /    |      \        \
+          /     |       \        \
+   desktop   storybook   vscode    claude-plugins
+```
 
 #### Why Gemini for Vision (not Claude)?
 

@@ -2,7 +2,7 @@
 
 ## One-Liner
 
-An AI development orchestrator that pairs vibe coding with vibe testing — generating code and executable acceptance tests in parallel, then converging them in an automated loop until the product matches expectations.
+An AI quality intelligence platform that generates code and tests in parallel, converges them automatically, then keeps learning — getting smarter with every build, every deploy, every production signal.
 
 ## The Problem
 
@@ -99,6 +99,17 @@ Willison's central observation — that AI has made code production nearly free 
 ### Local-First
 Everything runs on the user's machine. Their repos, their API keys, their privacy. No cloud dependency for core functionality. Fast iteration without network latency.
 
+### Continuous Quality
+Quality doesn't end at merge. The platform extends into three acts:
+- **Build** (development time) — the convergence loop generates, verifies, and ships
+- **Guard** (post-merge) — continuous monitoring, release gating, production feedback
+- **Learn** (always) — every outcome refines risk models, test strategies, and generation quality
+
+The Build act is the MVP. Guard and Learn make the platform compound over time. See [Intelligent QA](INTELLIGENT_QA.md) for the full quality intelligence vision.
+
+### Intelligence Compounds
+The system gets smarter with every interaction. Risk predictions are recalibrated after each release. Test generation templates evolve based on defect detection rates. False positives dismissed by developers reduce future noise. Production bugs not caught by tests expose coverage gaps that inform future generation. This creates a flywheel: more usage → better intelligence → more value → more usage.
+
 ## Target User
 
 Converge targets the **builder** — the person who knows what they want to build and wants to build it fast. This is increasingly a merged PM/developer role:
@@ -141,8 +152,20 @@ For the MVP:
 
 ## Future Roadmap (Post-MVP)
 
+### Near-Term
 - **Competitive Agents**: Spawn multiple implementations of the same task, pick the one that passes the most tests
 - **Spec Recording**: User walks through desired workflow in browser, recording becomes the acceptance test
+- **Self-Healing Tests**: Semantic self-healing via intent-encoded .sigma files — re-derive steps when flows change, not just re-find elements
+
+### Quality Intelligence (see [INTELLIGENT_QA.md](INTELLIGENT_QA.md))
+- **Risk Prediction**: Code complexity + defect history + change frequency → risk scores that prioritize testing effort
+- **Coverage Intelligence**: Automatic coverage heat maps — untested paths flagged before code is written
+- **Multi-Modal Testing**: Extend beyond functional + visual to performance, security, accessibility, chaos
+- **Release Gating**: Composite confidence scores with reasoning, not binary pass/fail
+- **Production Monitoring**: Continuous anomaly detection post-deploy, with automatic regression test generation from incidents
+
+### Ecosystem
+- **CI/CD Integration**: Converge as a pipeline stage, generated tests as regression suite
 - **Team Collaboration**: Multiple humans orchestrating shared agent pools
-- **CI/CD Integration**: Converge runs as part of the deployment pipeline (generated tests become regression suite)
-- **Self-Improving Tests**: Agent that hardens flaky tests by adding proper waits, retries, and resilience patterns
+- **Issue Tracking**: Auto-file bugs with reproduction steps, linked to code + test + diagnosis
+- **Learning Engine**: Pattern learning, risk model refinement, developer feedback loops — the system compounds knowledge across projects

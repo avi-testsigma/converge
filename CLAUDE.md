@@ -29,6 +29,7 @@ See `docs/ARCHITECTURE.md` for full system design and dependency graph.
 - `docs/STORYBOOK_INTEGRATION.md` — Storybook addon design
 - `docs/VSCODE_EXTENSION.md` — VS Code extension design
 - `docs/CLAUDE_PLUGINS.md` — Skills, sub-agents, MCP tools
+- `docs/INTELLIGENT_QA.md` — Quality intelligence layer (risk, monitoring, learning)
 
 ## Dependencies (External)
 

@@ -346,6 +346,63 @@ The MVP is complete when a user can:
 - [ ] Merge approved changes to their branch
 - [ ] Keep generated tests as regression suite
 
+---
+
+## Post-MVP Phases (Quality Intelligence)
+
+See [INTELLIGENT_QA.md](INTELLIGENT_QA.md) for the full quality intelligence vision.
+
+### Phase 6: Intelligence Foundation
+
+**Risk Scoring & Coverage**
+- `risk-agent` computes risk scores from code complexity, git history, defect patterns
+- Coverage heat map — identify untested paths before generating tests
+- Risk-informed test generation — focus effort on high-risk areas
+- `--budget N` flag for CLI skill — run the N most valuable tests
+- Risk gutter icons in VS Code extension
+
+**Self-Healing Tests**
+- `heal-agent` classifies test failures as "app bug" vs "test infrastructure"
+- Smart locator fallback (multi-attribute matching)
+- Adaptive waits (learn typical load times per action)
+- Semantic re-derivation — .sigma intent trees enable re-planning steps when flows change
+
+### Phase 7: Continuous Guard
+
+**Release Gating**
+- Composite confidence score (not binary pass/fail) with reasoning
+- Configurable risk thresholds per module (`.converge/risk-config.yaml`)
+- Release assessment interface in desktop app and CLI output
+
+**Production Monitoring**
+- `monitor-agent` ingests webhooks from APM tools (Datadog, New Relic, CloudWatch)
+- Anomaly detection — alert when behavior deviates from baselines
+- Incident-to-test pipeline — every production incident becomes a regression test
+
+**External Integrations**
+- CI/CD pipeline stage (GitHub Actions, GitLab CI)
+- Issue tracking (auto-file bugs to Jira, Linear, GitHub Issues)
+- Team notifications (Slack, Teams)
+
+### Phase 8: Learning Engine
+
+**Pattern Learning**
+- Track which tests catch real bugs vs produce noise
+- Track which risk predictions were accurate
+- Track which code areas cluster defects
+
+**Model Refinement**
+- Recalibrate risk scores after each release (prediction vs reality)
+- Evolve test generation templates based on defect detection rate
+- Learn environmental quirks (CI timing, flaky infrastructure patterns)
+
+**Developer Feedback Loop**
+- False positives dismissed by developers → reduce future noise
+- Production bugs not caught by tests → coverage gap analysis
+- Actual vs predicted defect rates → model accuracy tracking
+
+---
+
 And we can demonstrate:
 - [ ] A non-trivial feature (multi-component, API + UI) built end-to-end
 - [ ] Convergence achieving all-tests-pass within 5 iterations
