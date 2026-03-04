@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Converge — Vibe Coding meets Vibe Testing</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg-card: #12121a;
+      --bg-card-hover: #1a1a28;
+      --text: #e8e8f0;
+      --text-muted: #8888a0;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.15);
+      --green: #22c55e;
+      --red: #ef4444;
+      --orange: #f59e0b;
+      --border: #2a2a3a;
+      --gradient-1: linear-gradient(135deg, #6366f1, #8b5cf6);
+      --gradient-2: linear-gradient(135deg, #22c55e, #06b6d4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    nav .logo {
+      font-weight: 700;
+      font-size: 1.1rem;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    nav .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    nav .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    nav .nav-links a:hover { color: var(--text); }
+
+    /* Slide sections */
+    section {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 5rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* Slide counter */
+    .slide-num {
+      position: absolute;
+      top: 5rem;
+      right: 2rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 .gradient {
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .hero .badge {
+      display: inline-block;
+      padding: 0.35rem 1rem;
+      border-radius: 100px;
+      background: var(--accent-glow);
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    /* Section headers */
+    h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    h2 .gradient {
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 3rem;
+      max-width: 700px;
+    }
+
+    /* Cards grid */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .card .icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .card h3 { margin-bottom: 0.5rem; }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    /* Flow diagram */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      position: relative;
+      padding-bottom: 2rem;
+    }
+
+    .flow-step:last-child { padding-bottom: 0; }
+
+    .flow-step .flow-marker {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .flow-step:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .flow-step .flow-content { flex: 1; padding-top: 0.4rem; }
+    .flow-step .flow-content h3 { font-size: 1.05rem; margin-bottom: 0.25rem; }
+    .flow-step .flow-content p { color: var(--text-muted); font-size: 0.9rem; }
+
+    .marker-vision { background: #7c3aed; color: white; }
+    .marker-ground { background: #0ea5e9; color: white; }
+    .marker-gen { background: #f59e0b; color: white; }
+    .marker-red { background: #ef4444; color: white; }
+    .marker-converge { background: #22c55e; color: white; }
+    .marker-review { background: #6366f1; color: white; }
+    .marker-merge { background: #10b981; color: white; }
+
+    /* Comparison table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      font-size: 0.92rem;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      text-align: left;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comparison-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .comparison-table tr:last-child td { border-bottom: none; }
+
+    .comparison-table .highlight-row td {
+      background: var(--accent-glow);
+      font-weight: 600;
+    }
+
+    .comparison-table .check { color: var(--green); }
+    .comparison-table .cross { color: var(--red); opacity: 0.5; }
+
+    /* Cascade levels */
+    .cascade {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 2rem;
+    }
+
+    .cascade-level {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 1.25rem;
+      border-radius: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 0.92rem;
+    }
+
+    .cascade-level .level-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      min-width: 28px;
+    }
+
+    .cascade-level .level-bar {
+      height: 4px;
+      border-radius: 2px;
+      flex: 1;
+      opacity: 0.6;
+    }
+
+    .cascade-level .level-label {
+      min-width: 200px;
+      font-weight: 500;
+    }
+
+    .cascade-level .level-what {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* Architecture diagram */
+    .arch-diagram {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 2rem;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre;
+      color: var(--text-muted);
+    }
+
+    .arch-diagram .hl { color: var(--accent); font-weight: 600; }
+    .arch-diagram .hl-green { color: var(--green); font-weight: 600; }
+    .arch-diagram .hl-orange { color: var(--orange); font-weight: 600; }
+
+    /* Surfaces grid */
+    .surfaces {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .surfaces { grid-template-columns: 1fr; }
+    }
+
+    .surface-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .surface-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .surface-card.s-desktop::before { background: var(--gradient-1); }
+    .surface-card.s-storybook::before { background: linear-gradient(90deg, #ff4785, #fc521f); }
+    .surface-card.s-vscode::before { background: linear-gradient(90deg, #007acc, #0098ff); }
+    .surface-card.s-claude::before { background: linear-gradient(90deg, #d4a574, #c8956c); }
+
+    .surface-card .s-icon { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
+    .surface-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+    .surface-card p { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 0.75rem; }
+
+    .surface-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .surface-card ul li {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      padding: 0.2rem 0;
+    }
+
+    .surface-card ul li::before {
+      content: '→ ';
+      color: var(--accent);
+    }
+
+    /* Phase timeline */
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+
+    .phase {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .phase .phase-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .phase .phase-weeks {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .phase h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+
+    .phase ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .phase ul li {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      padding: 0.15rem 0;
+    }
+
+    .phase ul li::before {
+      content: '· ';
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* What we leverage */
+    .leverage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+
+    .leverage-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .leverage-card .stat {
+      font-size: 2rem;
+      font-weight: 800;
+      background: var(--gradient-2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .leverage-card h3 { font-size: 1rem; margin-bottom: 0.35rem; }
+    .leverage-card p { color: var(--text-muted); font-size: 0.85rem; }
+
+    /* CTA */
+    .cta-section {
+      text-align: center;
+    }
+
+    .cta-section h2 { margin-bottom: 1.5rem; }
+
+    .cta-links {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cta-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.92rem;
+      transition: all 0.2s;
+    }
+
+    .cta-primary {
+      background: var(--gradient-1);
+      color: white;
+    }
+
+    .cta-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .cta-secondary {
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .cta-secondary:hover { border-color: var(--accent); }
+
+    /* Key insight callout */
+    .insight {
+      background: var(--accent-glow);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .insight::before {
+      content: '"';
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--accent);
+      opacity: 0.3;
+      position: absolute;
+      top: 0.5rem;
+      left: 1rem;
+      line-height: 1;
+    }
+
+    .insight p {
+      font-size: 1.15rem;
+      font-weight: 500;
+      padding-left: 2rem;
+    }
+
+    .insight .attribution {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      padding-left: 2rem;
+    }
+
+    /* Two column */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .two-col { grid-template-columns: 1fr; }
+      section { padding: 4rem 1.25rem; }
+      nav .nav-links { display: none; }
+    }
+
+    /* Fade in animation */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    section > * {
+      animation: fadeUp 0.6s ease-out both;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Converge</div>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#confidence">Confidence</a></li>
+    <li><a href="#surfaces">Surfaces</a></li>
+    <li><a href="#leverage">Assets</a></li>
+    <li><a href="#mvp">MVP</a></li>
+    <li><a href="https://github.com/avi-testsigma/converge">GitHub</a></li>
+  </ul>
+</nav>
+
+<!-- Slide 1: Hero -->
+<section id="hero" class="hero">
+  <span class="slide-num">01</span>
+  <div class="badge">AI Development Orchestrator</div>
+  <h1>
+    <span class="gradient">Vibe Coding</span> meets<br>
+    <span class="gradient">Vibe Testing</span>
+  </h1>
+  <p>
+    Describe what you want. Approve a visual prototype. Watch parallel agents generate code and tests.
+    Automatically converge them until everything works. Then review and merge.
+  </p>
+</section>
+
+<!-- Slide 2: Problem -->
+<section id="problem">
+  <span class="slide-num">02</span>
+  <h2>The <span class="gradient">Problem</span></h2>
+  <p class="subtitle">
+    AI coding tools generate code fast. But nobody verifies it automatically.
+    The human is still the only quality gate.
+  </p>
+
+  <div class="cards">
+    <div class="card">
+      <span class="icon">&#x1F916;</span>
+      <h3>Code Agents Are Blind</h3>
+      <p>Claude Code, Codex, Cursor generate code — but don't know if it actually works for the user's intent. Output is "pure luck" without execution.</p>
+    </div>
+    <div class="card">
+      <span class="icon">&#x1F465;</span>
+      <h3>Orchestrators Multiply the Problem</h3>
+      <p>Conductor, Claude Squad run 5-10 agents in parallel. Great for throughput — but the review bottleneck grows linearly. More agents = more to verify manually.</p>
+    </div>
+    <div class="card">
+      <span class="icon">&#x23F3;</span>
+      <h3>Review Doesn't Scale</h3>
+      <p>Reading every line of AI-generated code, manually testing, mentally comparing against intent, writing feedback — this kills the productivity gain from parallel agents.</p>
+    </div>
+  </div>
+
+  <div class="insight">
+    <p>Writing code is cheap now. But good code — correct, tested, matching intent — is still expensive. Every orchestrator optimizes for generating more code faster. Nobody optimizes for generating more confidence faster.</p>
+    <div class="attribution">— Inspired by Simon Willison, "Agentic Engineering Patterns"</div>
+  </div>
+</section>
+
+<!-- Slide 3: The Insight -->
+<section id="insight">
+  <span class="slide-num">03</span>
+  <h2>Two <span class="gradient">Insights</span></h2>
+  <p class="subtitle">
+    What if the AI generated both the code AND its verification criteria — from the same requirement?
+  </p>
+
+  <div class="two-col">
+    <div class="card">
+      <span class="icon">&#x1F9EA;</span>
+      <h3>Tests Are Executable Specifications</h3>
+      <p>Generate tests FROM the requirement (not from the code). Tests become an automated verification layer between AI and human. The human reviews test adequacy — "does this capture what I want?" — rather than code correctness.</p>
+      <p style="margin-top: 0.75rem;">Tests are shorter, more readable, and directly tied to intent. This is <strong>TDD at the orchestration level</strong>.</p>
+    </div>
+    <div class="card">
+      <span class="icon">&#x1F3A8;</span>
+      <h3>Visual Prototypes Are Reviewable Specs</h3>
+      <p>A mockup is faster to approve than a written spec. Generate a visual prototype first, then derive both code and tests from the approved visual.</p>
+      <p style="margin-top: 0.75rem;">The mockup becomes the <strong>visual contract</strong>. Screenshot comparison against it is automated verification of design intent.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 4: How It Works -->
+<section id="how">
+  <span class="slide-num">04</span>
+  <h2>How <span class="gradient">Converge</span> Works</h2>
+  <p class="subtitle">Seven phases from requirement to merged, verified code.</p>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-marker marker-vision">1</div>
+      <div class="flow-content">
+        <h3>Envision</h3>
+        <p>Describe a feature. Converge generates visual mockups via Gemini Nano Banana Pro. Pick one, iterate ("make the button blue"), approve.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-marker marker-ground">2</div>
+      <div class="flow-content">
+        <h3>Decompose &amp; Ground</h3>
+        <p>The approved vision is broken into parallel tasks. A grounding agent explores your codebase — framework, conventions, existing tests — and passes context to all agents.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-marker marker-gen">3</div>
+      <div class="flow-content">
+        <h3>Dual-Track Generate</h3>
+        <p>Code agents and test agents work simultaneously in isolated git worktrees. Code agents implement. Test agents generate <code>.sigma</code> behavior tree acceptance tests from the requirement — not from the code.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-marker marker-red">4</div>
+      <div class="flow-content">
+        <h3>Red Check</h3>
+        <p>Generated tests run against the current codebase (before code changes). Every test must fail. If a test passes without new code, it's vacuous — it tests nothing. Flagged and regenerated.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-marker marker-converge">5</div>
+      <div class="flow-content">
+        <h3>Converge</h3>
+        <p>Code is merged. Existing tests run first (regression check). Then BT tests run. Failures produce structured diagnostics — which step failed, screenshots, DOM state. Fix agents are dispatched. Loop until all tests pass and the visual matches the mockup.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-marker marker-review">6</div>
+      <div class="flow-content">
+        <h3>Review</h3>
+        <p>Read the change walkthrough — a narrative summary of what was built. See test pass rate, visual similarity, regression status. Review generated tests in the visual editor. Everything that reaches you has already passed automated verification.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-marker marker-merge">7</div>
+      <div class="flow-content">
+        <h3>Merge</h3>
+        <p>One click. Changes merged to your branch. Generated tests kept as regression suite. Worktrees cleaned up.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 5: Cascading Confidence -->
+<section id="confidence">
+  <span class="slide-num">05</span>
+  <h2><span class="gradient">Cascading</span> Confidence</h2>
+  <p class="subtitle">
+    Eight verification layers filter issues before human review.
+    The human only deals with high-level intent questions.
+  </p>
+
+  <div class="cascade">
+    <div class="cascade-level">
+      <span class="level-tag">L0</span>
+      <span class="level-label">Existing test baseline</span>
+      <div class="level-bar" style="background: #6366f1; width: 100%;"></div>
+      <span class="level-what">Regression safety</span>
+    </div>
+    <div class="cascade-level">
+      <span class="level-tag">L1</span>
+      <span class="level-label">Red-phase check</span>
+      <div class="level-bar" style="background: #ef4444; width: 90%;"></div>
+      <span class="level-what">Test validity</span>
+    </div>
+    <div class="cascade-level">
+      <span class="level-tag">L2</span>
+      <span class="level-label">Lint + typecheck</span>
+      <div class="level-bar" style="background: #f59e0b; width: 80%;"></div>
+      <span class="level-what">Syntax correctness</span>
+    </div>
+    <div class="cascade-level">
+      <span class="level-tag">L3</span>
+      <span class="level-label">Unit tests</span>
+      <div class="level-bar" style="background: #22c55e; width: 70%;"></div>
+      <span class="level-what">Logic correctness</span>
+    </div>
+    <div class="cascade-level">
+      <span class="level-tag">L4</span>
+      <span class="level-label">Behavior tree tests</span>
+      <div class="level-bar" style="background: #06b6d4; width: 60%;"></div>
+      <span class="level-what">Functional correctness</span>
+    </div>
+    <div class="cascade-level">
+      <span class="level-tag">L5</span>
+      <span class="level-label">Visual verification</span>
+      <div class="level-bar" style="background: #8b5cf6; width: 50%;"></div>
+      <span class="level-what">Design correctness</span>
+    </div>
+    <div class="cascade-level">
+      <span class="level-tag">L6</span>
+      <span class="level-label">Change walkthrough</span>
+      <div class="level-bar" style="background: #d946ef; width: 40%;"></div>
+      <span class="level-what">Comprehension aid</span>
+    </div>
+    <div class="cascade-level">
+      <span class="level-tag">L7</span>
+      <span class="level-label">Human review</span>
+      <div class="level-bar" style="background: #f43f5e; width: 30%;"></div>
+      <span class="level-what">Intent correctness</span>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 6: Positioning -->
+<section id="positioning">
+  <span class="slide-num">06</span>
+  <h2>Where <span class="gradient">Converge</span> Sits</h2>
+  <p class="subtitle">
+    The only tool that generates both code AND its verification criteria,
+    then automatically converges them.
+  </p>
+
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Tool</th>
+        <th>Parallel Agents</th>
+        <th>Auto Tests</th>
+        <th>Visual Prototype</th>
+        <th>Convergence Loop</th>
+        <th>Regression Safety</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Claude Code / Codex</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+      </tr>
+      <tr>
+        <td>Conductor / Claude Squad</td>
+        <td class="check">&#x2713;</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+      </tr>
+      <tr>
+        <td>Cursor / Windsurf</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+      </tr>
+      <tr>
+        <td>Testsigma / Playwright</td>
+        <td class="cross">&#x2717;</td>
+        <td class="check">&#x2713;</td>
+        <td class="cross">&#x2717;</td>
+        <td class="cross">&#x2717;</td>
+        <td class="check">&#x2713;</td>
+      </tr>
+      <tr class="highlight-row">
+        <td>Converge</td>
+        <td class="check">&#x2713;</td>
+        <td class="check">&#x2713;</td>
+        <td class="check">&#x2713;</td>
+        <td class="check">&#x2713;</td>
+        <td class="check">&#x2713;</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Slide 7: Integration Surfaces -->
+<section id="surfaces">
+  <span class="slide-num">07</span>
+  <h2>Meet Developers <span class="gradient">Where They Work</span></h2>
+  <p class="subtitle">
+    One core engine. Four surfaces. Same convergence loop everywhere.
+  </p>
+
+  <div class="surfaces">
+    <div class="surface-card s-desktop">
+      <span class="s-icon">&#x1F5A5;&#xFE0F;</span>
+      <h3>Desktop App</h3>
+      <p>The full orchestration experience. Vision studio, agent monitor, convergence dashboard, review &amp; merge.</p>
+      <ul>
+        <li>Electron — local-first, your machine</li>
+        <li>Multi-agent monitor with live streaming</li>
+        <li>Embedded sigma-authoring for test review</li>
+        <li>Visual comparison: mockup vs implementation</li>
+      </ul>
+    </div>
+
+    <div class="surface-card s-storybook">
+      <span class="s-icon">&#x1F4D6;</span>
+      <h3>Storybook Addon</h3>
+      <p>Component-level TDD. Red/green status per story. Automatic promotion from story tests to E2E.</p>
+      <ul>
+        <li>TDD panel with agent activity</li>
+        <li>play() &#x2194; .sigma bidirectional bridge</li>
+        <li>postVisit hook for cross-browser promotion</li>
+        <li>Observer decorator for interaction capture</li>
+      </ul>
+    </div>
+
+    <div class="surface-card s-vscode">
+      <span class="s-icon">&#x1F4DD;</span>
+      <h3>VS Code Extension</h3>
+      <p>Inline feedback where you already code. Status bar, diagnostics, CodeLens — connected to the desktop app.</p>
+      <ul>
+        <li>Status bar with convergence progress</li>
+        <li>Inline diagnostics from BT test failures</li>
+        <li>CodeLens above test-linked components</li>
+        <li>Change walkthrough in webview panel</li>
+      </ul>
+    </div>
+
+    <div class="surface-card s-claude">
+      <span class="s-icon">&#x1F4AC;</span>
+      <h3>Claude Code Plugins</h3>
+      <p>Skills, sub-agents, and MCP tools. Use Converge directly from the CLI without a UI.</p>
+      <ul>
+        <li>/converge-test, /converge-vision, /converge-review</li>
+        <li>6 specialized sub-agents (ground, test, fix...)</li>
+        <li>MCP tools: run_bt_tests, visual_compare, diagnose</li>
+        <li>Composable: skills invoke agents which call tools</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 8: Architecture -->
+<section id="arch">
+  <span class="slide-num">08</span>
+  <h2><span class="gradient">Monorepo</span> Architecture</h2>
+  <p class="subtitle">
+    Shared core logic consumed by all surfaces. pnpm + Turbo.
+  </p>
+
+  <div class="arch-diagram"><span class="hl">@converge/shared</span>  ← types, events, constants (zero logic)
+    │
+    ├── <span class="hl">@converge/git</span>  ← worktree management, merge, diff
+    ├── <span class="hl">@converge/vision</span>  ← Gemini mockups + visual comparison
+    └── <span class="hl">@converge/bt-bridge</span>  ← BT runner, event parsing, .sigma ops
+          │
+          <span class="hl-orange">@converge/core</span>  ← orchestrator, convergence engine, agent manager
+          │
+    ┌─────┼──────────┬───────────────┐
+    │     │          │               │
+<span class="hl-green">desktop</span>  <span class="hl-green">storybook</span>   <span class="hl-green">vscode-ext</span>   <span class="hl-green">claude-plugins</span>
+Electron  addon       extension     skills + MCP</div>
+</section>
+
+<!-- Slide 9: What We Leverage -->
+<section id="leverage">
+  <span class="slide-num">09</span>
+  <h2>What We <span class="gradient">Already Have</span></h2>
+  <p class="subtitle">
+    This isn't built from scratch. We bring production-grade infrastructure.
+  </p>
+
+  <div class="leverage-grid">
+    <div class="leverage-card">
+      <span class="stat">60+</span>
+      <h3>Playwright Atoms</h3>
+      <p>behaviour-tree-ecosystem: Click, Fill, Navigate, Verify, Extract, Wait — all as composable BT nodes designed for LLM generation.</p>
+    </div>
+    <div class="leverage-card">
+      <span class="stat">27</span>
+      <h3>Core Node Types</h3>
+      <p>Sequence, Selector, Parallel, Retry, Timeout, ForEach, While, Conditional — full control flow for complex test scenarios.</p>
+    </div>
+    <div class="leverage-card">
+      <span class="stat">30K</span>
+      <h3>Lines of Authoring UI</h3>
+      <p>sigma-authoring: block editor, behavior tree visualizer, live execution, screencast, step-by-step debugging. Production-ready.</p>
+    </div>
+    <div class="leverage-card">
+      <span class="stat">200+</span>
+      <h3>Template Mappings</h3>
+      <p>bt-nlpjson converter maps action templates to BT nodes. Proven format for LLM-friendly test generation.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 10: MVP -->
+<section id="mvp">
+  <span class="slide-num">10</span>
+  <h2>MVP <span class="gradient">Phases</span></h2>
+  <p class="subtitle">
+    13 weeks to a working product that proves the thesis.
+  </p>
+
+  <div class="timeline">
+    <div class="phase">
+      <div class="phase-tag">Phase 1</div>
+      <div class="phase-weeks">Weeks 1–3</div>
+      <h3>Foundation</h3>
+      <ul>
+        <li>Electron shell + project setup</li>
+        <li>Git worktree manager</li>
+        <li>Claude Code agent spawning</li>
+        <li>1-5 concurrent agents</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="phase-tag">Phase 2</div>
+      <div class="phase-weeks">Weeks 3–5</div>
+      <h3>Vision Studio</h3>
+      <ul>
+        <li>Gemini mockup generation</li>
+        <li>Mockup iteration + approval</li>
+        <li>Visual comparison engine</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="phase-tag">Phase 3</div>
+      <div class="phase-weeks">Weeks 5–8</div>
+      <h3>Dual-Track Generation</h3>
+      <ul>
+        <li>Task decomposition</li>
+        <li>Codebase grounding agent</li>
+        <li>Parallel code + test agents</li>
+        <li>Agent monitor dashboard</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="phase-tag">Phase 4</div>
+      <div class="phase-weeks">Weeks 8–11</div>
+      <h3>Convergence Engine</h3>
+      <ul>
+        <li>Baseline + red-phase check</li>
+        <li>BT test execution</li>
+        <li>Failure diagnosis + fix loop</li>
+        <li>Regression safety</li>
+        <li>Change walkthrough</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="phase-tag">Phase 5</div>
+      <div class="phase-weeks">Weeks 11–13</div>
+      <h3>Review &amp; Merge</h3>
+      <ul>
+        <li>Review package UI</li>
+        <li>sigma-authoring integration</li>
+        <li>One-click merge</li>
+        <li>Regression suite retention</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 11: Roadmap -->
+<section id="roadmap">
+  <span class="slide-num">11</span>
+  <h2>Beyond <span class="gradient">MVP</span></h2>
+  <p class="subtitle">
+    The platform grows from desktop app to full ecosystem.
+  </p>
+
+  <div class="cards">
+    <div class="card">
+      <span class="icon">&#x1F3C6;</span>
+      <h3>Competitive Agents</h3>
+      <p>Spawn 2-3 implementations of the same task. Run the same test suite against all. Pick the one that passes the most tests with the best visual match.</p>
+    </div>
+    <div class="card">
+      <span class="icon">&#x1F4D6;</span>
+      <h3>Storybook Addon</h3>
+      <p>Component-level TDD panel. Story ↔ behavior tree bridge. Automatic promotion from isolated component tests to cross-browser E2E.</p>
+    </div>
+    <div class="card">
+      <span class="icon">&#x1F4DD;</span>
+      <h3>VS Code Extension</h3>
+      <p>Inline diagnostics, CodeLens, status bar. Converge feedback where you already code. Connected to the desktop orchestrator.</p>
+    </div>
+    <div class="card">
+      <span class="icon">&#x1F4AC;</span>
+      <h3>Claude Plugins</h3>
+      <p>Skills, sub-agents, MCP tools. Use Converge from the CLI. /converge-test as a four-word command that runs the full loop.</p>
+    </div>
+    <div class="card">
+      <span class="icon">&#x1F3AC;</span>
+      <h3>Spec Recording</h3>
+      <p>Walk through the desired workflow in a browser. The recording becomes the acceptance test. Code agents must make it pass.</p>
+    </div>
+    <div class="card">
+      <span class="icon">&#x1F91D;</span>
+      <h3>Team Collaboration</h3>
+      <p>Multiple humans orchestrating shared agent pools. Shared visual specs. Collaborative test review.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 12: CTA -->
+<section id="cta" class="cta-section">
+  <span class="slide-num">12</span>
+  <h2>Let's <span class="gradient">Build This</span></h2>
+  <p class="subtitle" style="margin: 0 auto 2rem;">
+    Converge is the missing layer between AI code generation and production confidence.
+  </p>
+
+  <div class="cta-links">
+    <a href="https://github.com/avi-testsigma/converge" class="cta-primary">
+      View on GitHub
+    </a>
+    <a href="VISION.md" class="cta-secondary">
+      Read the Vision Doc
+    </a>
+    <a href="ARCHITECTURE.md" class="cta-secondary">
+      Read the Architecture
+    </a>
+    <a href="MVP.md" class="cta-secondary">
+      Read the MVP Scope
+    </a>
+  </div>
+</section>
+
+</body>
+</html>
