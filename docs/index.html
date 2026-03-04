@@ -691,6 +691,8 @@
     }
 
     @media (max-width: 768px) {
+      html { scroll-snap-type: none; }
+      section { scroll-snap-align: none; min-height: auto; }
       .two-col { grid-template-columns: 1fr; }
       section { padding: 4rem 1.25rem; }
       nav .nav-links { display: none; }
