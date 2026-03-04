@@ -1,0 +1,23 @@
+{
+  "name": "@converge/storybook-addon",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Storybook addon: agentic TDD panel, red/green status, story-to-BT bridge",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src/",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@converge/shared": "workspace:*",
+    "@converge/core": "workspace:*",
+    "@converge/bt-bridge": "workspace:*"
+  },
+  "peerDependencies": {
+    "storybook": "^8.0.0"
+  }
+}

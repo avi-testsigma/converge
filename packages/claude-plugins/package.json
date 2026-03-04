@@ -1,0 +1,21 @@
+{
+  "name": "@converge/claude-plugins",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Claude Code skills, sub-agents, and MCP tools for Converge workflows",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src/",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@converge/shared": "workspace:*",
+    "@converge/core": "workspace:*",
+    "@converge/bt-bridge": "workspace:*",
+    "@converge/vision": "workspace:*"
+  }
+}

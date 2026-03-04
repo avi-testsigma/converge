@@ -1,0 +1,27 @@
+{
+  "name": "@converge/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Converge desktop app — Electron shell with orchestration UI",
+  "main": "./dist/main/index.js",
+  "scripts": {
+    "build": "turbo build --filter=@converge/desktop",
+    "dev": "electron-vite dev",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src/",
+    "test": "vitest run",
+    "package": "electron-builder"
+  },
+  "dependencies": {
+    "@converge/core": "workspace:*",
+    "@converge/shared": "workspace:*",
+    "@converge/git": "workspace:*",
+    "@converge/vision": "workspace:*",
+    "@converge/bt-bridge": "workspace:*"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-vite": "^2.3.0",
+    "electron-builder": "^25.0.0"
+  }
+}

@@ -557,96 +557,177 @@ interface DiagnosticReport {
 | **Process Management** | execa | Spawning and managing Claude Code processes |
 | **Screencast** | CDP (Chrome DevTools Protocol) | Already used in sigma-authoring |
 
-### 5. Project Structure
+### 5. Monorepo Structure
+
+Converge is a pnpm + Turbo monorepo. Core logic lives in shared packages consumed by multiple surfaces (desktop app, Storybook addon, VS Code extension, Claude plugins).
+
+**Dependency Graph:**
 
 ```
-testsigma-converge/
+                    @converge/shared
+                   (types, events, constants)
+                    /     |     \      \
+                   /      |      \      \
+          @converge/  @converge/  @converge/  @converge/
+          git         vision      bt-bridge   (leaf packages)
+            \           |           /     \
+             \          |          /       \
+              @converge/core               \
+         (orchestrator, convergence,        \
+          agent management)                  \
+           /    |      \        \             \
+          /     |       \        \             \
+   @converge/  @converge/  @converge/   @converge/
+   desktop     storybook   vscode-ext   claude-plugins
+   (Electron)  -addon      (VS Code)   (skills, MCP,
+                                        sub-agents)
+```
+
+**Directory Layout:**
+
+```
+converge/
+├── apps/
+│   └── desktop/                        # Electron app (MVP primary surface)
+│       ├── src/
+│       │   ├── main/                   # Electron main process
+│       │   │   ├── ipc/               # IPC handler registration
+│       │   │   ├── server.ts          # Local WebSocket server (for VS Code ext)
+│       │   │   └── index.ts
+│       │   └── renderer/              # React UI
+│       │       ├── views/
+│       │       │   ├── ProjectSetup.tsx
+│       │       │   ├── VisionStudio.tsx
+│       │       │   ├── AgentMonitor.tsx
+│       │       │   ├── ReviewMerge.tsx
+│       │       │   └── TestEditor.tsx
+│       │       ├── components/
+│       │       │   ├── agent-card/
+│       │       │   ├── convergence-timeline/
+│       │       │   ├── mockup-gallery/
+│       │       │   ├── diff-viewer/
+│       │       │   ├── visual-comparison/
+│       │       │   ├── walkthrough-viewer/
+│       │       │   └── test-results/
+│       │       └── stores/
+│       └── package.json
+│
 ├── packages/
-│   ├── main/                          # Electron main process
-│   │   ├── src/
-│   │   │   ├── orchestrator/
-│   │   │   │   ├── engine.ts          # OrchestratorEngine
-│   │   │   │   ├── state-machine.ts   # Session state management
-│   │   │   │   └── task-planner.ts    # Requirement → TaskPlan decomposition
-│   │   │   ├── agents/
-│   │   │   │   ├── manager.ts         # AgentManager
-│   │   │   │   ├── claude-code.ts     # Claude Code subprocess wrapper
-│   │   │   │   ├── codex.ts           # Codex subprocess wrapper (future)
-│   │   │   │   └── prompt-templates/  # Task-specific prompt templates
-│   │   │   │       ├── ground-agent.md
-│   │   │   │       ├── code-agent.md
-│   │   │   │       ├── test-agent.md
-│   │   │   │       ├── fix-agent.md
-│   │   │   │       ├── fix-regression-agent.md
-│   │   │   │       ├── diagnose-agent.md
-│   │   │   │       └── walkthrough-agent.md
-│   │   │   ├── convergence/
-│   │   │   │   ├── engine.ts          # ConvergenceEngine
-│   │   │   │   ├── diagnostics.ts     # Failure analysis
-│   │   │   │   └── visual-verify.ts   # Screenshot vs mockup comparison
-│   │   │   ├── git/
-│   │   │   │   ├── worktree.ts        # WorktreeManager
-│   │   │   │   └── merge.ts           # Integration branch management
-│   │   │   ├── vision/
-│   │   │   │   ├── service.ts         # VisionService (Gemini API)
-│   │   │   │   └── comparison.ts      # Visual diff logic
-│   │   │   ├── bt-runner/
-│   │   │   │   ├── runner.ts          # Embedded BT execution
-│   │   │   │   └── event-parser.ts    # BT event stream processing
-│   │   │   └── ipc/
-│   │   │       └── handlers.ts        # IPC handler registration
-│   │   └── index.ts                   # Electron main entry
-│   │
-│   ├── renderer/
-│   │   ├── src/
-│   │   │   ├── views/
-│   │   │   │   ├── ProjectSetup.tsx
-│   │   │   │   ├── VisionStudio.tsx
-│   │   │   │   ├── AgentMonitor.tsx
-│   │   │   │   ├── ReviewMerge.tsx
-│   │   │   │   └── TestEditor.tsx     # Wraps sigma-authoring
-│   │   │   ├── components/
-│   │   │   │   ├── agent-card/
-│   │   │   │   ├── convergence-timeline/
-│   │   │   │   ├── mockup-gallery/
-│   │   │   │   ├── diff-viewer/
-│   │   │   │   ├── visual-comparison/
-│   │   │   │   └── test-results/
-│   │   │   ├── stores/
-│   │   │   │   ├── project-store.ts
-│   │   │   │   ├── agent-store.ts
-│   │   │   │   └── convergence-store.ts
-│   │   │   └── lib/
-│   │   │       └── ipc-client.ts      # Typed IPC client
-│   │   └── index.html
-│   │
-│   ├── shared/                        # Shared types between main/renderer
+│   ├── shared/                         # Types, events, constants
 │   │   └── src/
-│   │       ├── types.ts
-│   │       └── events.ts
+│   │       ├── types.ts               # Core interfaces (AgentConfig, TestResult, etc.)
+│   │       ├── events.ts             # ConvergenceEvent union type
+│   │       └── index.ts
 │   │
-│   └── sigma-authoring/               # Extracted/embedded from drifter-electron
-│       └── (existing sigma-authoring code)
+│   ├── core/                           # Orchestration engine (the brain)
+│   │   └── src/
+│   │       ├── orchestrator/
+│   │       │   ├── engine.ts          # OrchestratorEngine
+│   │       │   ├── state-machine.ts   # Session state (IDLE → ... → MERGED)
+│   │       │   └── task-planner.ts    # Requirement → TaskPlan decomposition
+│   │       ├── agents/
+│   │       │   ├── manager.ts         # AgentManager (spawn, terminate, stream)
+│   │       │   ├── claude-code.ts     # Claude Code CLI subprocess wrapper
+│   │       │   └── types.ts          # Agent type definitions
+│   │       ├── convergence/
+│   │       │   ├── engine.ts          # ConvergenceEngine (the loop)
+│   │       │   ├── baseline.ts        # Existing test suite baseline
+│   │       │   ├── red-check.ts       # Red-phase verification
+│   │       │   ├── regression.ts      # Regression detection
+│   │       │   ├── diagnostics.ts     # Failure analysis
+│   │       │   └── visual-verify.ts   # Screenshot vs mockup comparison
+│   │       └── index.ts
+│   │
+│   ├── git/                            # Git operations
+│   │   └── src/
+│   │       ├── worktree.ts            # WorktreeManager
+│   │       ├── merge.ts              # Integration branch management
+│   │       └── index.ts
+│   │
+│   ├── vision/                         # Gemini integration
+│   │   └── src/
+│   │       ├── service.ts             # VisionService (mockup generation)
+│   │       ├── comparison.ts          # Visual diff (mockup vs screenshot)
+│   │       └── index.ts
+│   │
+│   ├── bt-bridge/                      # Behavior tree ecosystem bridge
+│   │   └── src/
+│   │       ├── runner.ts              # BT execution wrapper
+│   │       ├── event-parser.ts        # BT event stream → structured results
+│   │       ├── sigma-utils.ts         # .sigma file operations
+│   │       └── index.ts
+│   │
+│   ├── storybook-addon/                # Storybook integration
+│   │   └── src/                       # See docs/STORYBOOK_INTEGRATION.md
+│   │       ├── manager.tsx            # Panel + toolbar registration
+│   │       ├── preview.tsx            # Decorator registration
+│   │       ├── Panel.tsx              # TDD panel component
+│   │       ├── bridge/
+│   │       │   ├── play-to-sigma.ts   # play() → .sigma conversion
+│   │       │   └── sigma-to-play.ts   # .sigma → play() conversion
+│   │       └── channel/
+│   │           └── events.ts
+│   │
+│   ├── vscode-extension/               # VS Code integration
+│   │   └── src/                       # See docs/VSCODE_EXTENSION.md
+│   │       ├── extension.ts           # Activation, commands
+│   │       ├── providers/
+│   │       │   ├── sidebar-provider.ts
+│   │       │   ├── status-bar.ts
+│   │       │   ├── diagnostics.ts
+│   │       │   └── codelens.ts
+│   │       └── client/
+│   │           └── connection.ts      # WebSocket to desktop app
+│   │
+│   └── claude-plugins/                 # Claude Code integrations
+│       └── src/                       # See docs/CLAUDE_PLUGINS.md
+│           ├── skills/                # Slash commands (/converge-test, etc.)
+│           ├── agents/                # Sub-agent definitions
+│           └── mcp/
+│               ├── server.ts          # MCP server entry
+│               ├── tools/             # MCP tool implementations
+│               └── resources/         # MCP resources (BT catalog, examples)
 │
 ├── prompt-templates/                   # Agent prompt engineering
 │   ├── system/
-│   │   ├── code-agent.md              # System prompt for code generation agents
-│   │   ├── test-agent.md              # System prompt for test generation agents
-│   │   ├── fix-agent.md               # System prompt for fix agents
-│   │   └── diagnose-agent.md          # System prompt for diagnostic agents
+│   │   ├── ground-agent.md
+│   │   ├── code-agent.md
+│   │   ├── test-agent.md
+│   │   ├── fix-agent.md
+│   │   ├── diagnose-agent.md
+│   │   └── walkthrough-agent.md
 │   └── examples/
-│       ├── sample-sigma-tests/        # Example .sigma files for few-shot prompting
-│       └── sample-diagnostics/        # Example diagnostic reports
+│       ├── sample-sigma-tests/
+│       └── sample-diagnostics/
 │
 ├── docs/
 │   ├── VISION.md
 │   ├── ARCHITECTURE.md
-│   └── MVP.md
+│   ├── MVP.md
+│   ├── AGENTIC_PATTERNS.md
+│   ├── STORYBOOK_INTEGRATION.md
+│   ├── VSCODE_EXTENSION.md
+│   └── CLAUDE_PLUGINS.md
 │
+├── pnpm-workspace.yaml
 ├── turbo.json
 ├── package.json
 └── CLAUDE.md
 ```
+
+**Why this split:**
+
+| Package | Rationale |
+|---------|-----------|
+| `shared` | Types/events used everywhere — zero logic, zero dependencies |
+| `core` | Orchestration logic reused by desktop, VS Code ext, and Claude plugins |
+| `git` | Worktree ops consumed by core and claude-plugins independently |
+| `vision` | Gemini API calls consumed by core and claude-plugins independently |
+| `bt-bridge` | BT runner consumed by core, storybook-addon, and claude-plugins |
+| `storybook-addon` | Ships as an npm package users install in their Storybook |
+| `vscode-extension` | Ships as a .vsix; connects to desktop app via WebSocket |
+| `claude-plugins` | Skills + MCP tools installable into Claude Code |
+| `desktop` | Electron app — the primary orchestration UI |
 
 ### 6. Key Design Decisions
 

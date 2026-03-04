@@ -1,0 +1,25 @@
+{
+  "name": "@converge/vscode-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VS Code extension: convergence status, agent monitor, test results, inline review",
+  "main": "./dist/extension.js",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src/",
+    "test": "vitest run",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "@converge/shared": "workspace:*",
+    "@converge/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.96.0"
+  },
+  "engines": {
+    "vscode": "^1.96.0"
+  }
+}

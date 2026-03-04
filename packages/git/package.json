@@ -1,0 +1,19 @@
+{
+  "name": "@converge/git",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Git worktree management, integration branch creation, merge operations",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src/",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@converge/shared": "workspace:*",
+    "simple-git": "^3.27.0"
+  }
+}
