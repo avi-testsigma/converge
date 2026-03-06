@@ -592,7 +592,7 @@ Converge is a pnpm + Turbo monorepo. Core logic lives in shared packages consume
 ```
 converge/
 ├── apps/
-│   └── desktop/                        # Electron app (MVP primary surface)
+│   └── desktop/                        # Electron app (Phase 5)
 │       ├── src/
 │       │   ├── main/                   # Electron main process
 │       │   │   ├── ipc/               # IPC handler registration
@@ -757,7 +757,7 @@ converge/
 - **Control**: Can pause, resume, modify tests mid-execution
 - **Isolation**: Each convergence iteration gets a fresh browser context
 
-### 7. Intelligence Layer (Post-MVP)
+### 7. Intelligence Layer (Phase 6+)
 
 The Intelligence Layer sits between `@converge/core` and the surfaces. It provides risk scoring, coverage analysis, and learning capabilities that make every surface smarter. See [INTELLIGENT_QA.md](INTELLIGENT_QA.md) for the full design.
 
