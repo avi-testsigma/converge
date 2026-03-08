@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Converge is an AI development orchestrator that pairs vibe coding with vibe testing. It generates code and executable acceptance tests in parallel, then converges them in an automated loop until the product matches expectations.
+Converge is an AI quality intelligence platform that generates code and tests in parallel from the same requirement, then converges them automatically until everything works.
 
 ## Architecture
 
@@ -31,10 +31,28 @@ See `docs/ARCHITECTURE.md` for full system design and dependency graph.
 - `docs/CLAUDE_PLUGINS.md` — Skills, sub-agents, MCP tools
 - `docs/INTELLIGENT_QA.md` — Quality intelligence layer (risk, monitoring, learning)
 
+## Phase 1: CLI Skill (Current)
+
+The `/converge-test` skill lives at `packages/claude-plugins/skills/converge-test/`:
+- `SKILL.md` — orchestration instructions for Claude Code (GROUND → GENERATE → RED CHECK → RUN → DIAGNOSE)
+- `references/` — 6 reference docs for .sigma XML authoring (copied from sigma-xml-authoring)
+- `INSTALL.md` — setup instructions
+
+Agent prompt templates in `prompt-templates/`:
+- `system/ground-agent.md` — codebase exploration instructions
+- `system/test-agent.md` — .sigma test generation from requirements
+- `system/diagnose-agent.md` — test failure analysis
+
+Sample files in `prompt-templates/examples/`:
+- `sample-sigma-tests/` — 6 curated .sigma example files
+- `sample-diagnostics/` — 3 diagnostic report examples
+- `sigma.config.template.ts` — sigmascript config template
+
 ## Dependencies (External)
 
 - **behaviour-tree-ecosystem**: BT runtime, XML parser, Playwright atoms — lives at `../behaviour-tree-ecosystem`
-- **sigma-authoring**: Visual test editor — extracted from `../drifter-electron/packages/renderer/sigma-authoring`
+- **sigmascript**: CLI test runner for .sigma files — lives at `../behaviour-tree-ecosystem/packages/sigmascript`
+- **sigma-authoring**: Visual test editor (Phase 5) — extracted from `../drifter-electron/packages/renderer/sigma-authoring`
 
 ## Development Commands
 

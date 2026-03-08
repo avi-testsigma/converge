@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Login Flow Test
+
+  Requirement: "Add user authentication with login page"
+
+  Tests:
+  1. Login page renders with form fields
+  2. Empty form submission shows validation errors
+  3. Invalid credentials show error message
+  4. Valid credentials redirect to dashboard
+  5. Logged-in user sees their name in header
+-->
+<root main_tree_to_execute="LoginFlowTest">
+
+  <!-- Reusable: Fill login form -->
+  <BehaviorTree ID="FillLogin" params="email, password">
+    <Sequence>
+      <Locate placeholder="Email address" as="emailInput" />
+      <Clear element="emailInput" />
+      <Fill element="emailInput" text="${email}" />
+      <Locate placeholder="Password" as="passwordInput" />
+      <Clear element="passwordInput" />
+      <Fill element="passwordInput" text="${password}" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="LoginFlowTest">
+    <Sequence>
+
+      <!-- Test 1: Login page renders -->
+      <Navigate url="http://localhost:3000/login" />
+      <ExpectURL expected="**/login" timeout="5000" />
+      <Locate role="heading" name="Sign In" as="heading" />
+      <ExpectVisible element="heading" expectedState="true" timeout="3000" />
+      <Locate placeholder="Email address" as="emailField" />
+      <ExpectVisible element="emailField" expectedState="true" timeout="2000" />
+      <Locate placeholder="Password" as="passwordField" />
+      <ExpectVisible element="passwordField" expectedState="true" timeout="2000" />
+      <Locate role="button" name="Sign In" as="signInBtn" />
+      <ExpectVisible element="signInBtn" expectedState="true" timeout="2000" />
+
+      <!-- Test 2: Empty submission shows validation -->
+      <Click element="signInBtn" />
+      <Locate text="Email is required" as="emailError" />
+      <ExpectVisible element="emailError" expectedState="true" timeout="3000" />
+
+      <!-- Test 3: Invalid credentials show error -->
+      <StepGroup ID="FillLogin" email="wrong@example.com" password="wrongpass" />
+      <Click element="signInBtn" />
+      <Locate text="Invalid email or password" as="authError" />
+      <ExpectVisible element="authError" expectedState="true" timeout="5000" />
+
+      <!-- Test 4: Valid login redirects to dashboard -->
+      <StepGroup ID="FillLogin" email="user@example.com" password="password123" />
+      <Click element="signInBtn" />
+      <ExpectURL expected="**/dashboard" timeout="10000" />
+
+      <!-- Test 5: Dashboard shows user name -->
+      <Locate text="user@example.com" as="userEmail" />
+      <ExpectVisible element="userEmail" expectedState="true" timeout="3000" />
+
+    </Sequence>
+  </BehaviorTree>
+</root>

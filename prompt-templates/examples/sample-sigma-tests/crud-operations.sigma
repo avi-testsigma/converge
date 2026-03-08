@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CRUD Operations Test
+
+  Requirement: "Add a todo list with create, read, update, and delete"
+
+  Tests:
+  1. Todo list page renders
+  2. User can add a new todo
+  3. New todo appears in the list
+  4. User can mark a todo as complete
+  5. User can delete a todo
+  6. Empty state shown when no todos
+-->
+<root main_tree_to_execute="TodoCRUDTest">
+
+  <!-- Reusable: Add a todo item -->
+  <BehaviorTree ID="AddTodo" params="text">
+    <Sequence>
+      <Locate placeholder="Add a new todo" as="todoInput" />
+      <Fill element="todoInput" text="${text}" />
+      <Locate role="button" name="Add" as="addBtn" />
+      <Click element="addBtn" />
+      <!-- Wait for the new item to appear -->
+      <Locate text="${text}" as="newItem" />
+      <ExpectVisible element="newItem" expectedState="true" timeout="3000" />
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="TodoCRUDTest">
+    <Sequence>
+
+      <!-- Navigate to todo page -->
+      <Navigate url="http://localhost:3000/todos" />
+      <ExpectURL expected="**/todos" timeout="5000" />
+
+      <!-- Test 1: Page renders -->
+      <Locate role="heading" name="Todos" as="heading" />
+      <ExpectVisible element="heading" expectedState="true" timeout="3000" />
+
+      <!-- Test 2 & 3: Create a todo and verify it appears -->
+      <StepGroup ID="AddTodo" text="Buy groceries" />
+      <StepGroup ID="AddTodo" text="Walk the dog" />
+
+      <!-- Verify both items are in the list -->
+      <Locate text="Buy groceries" as="todo1" />
+      <ExpectVisible element="todo1" expectedState="true" timeout="2000" />
+      <Locate text="Walk the dog" as="todo2" />
+      <ExpectVisible element="todo2" expectedState="true" timeout="2000" />
+
+      <!-- Test 4: Mark as complete -->
+      <Locate css="[data-testid='todo-checkbox']" as="checkboxes" />
+      <First elements="checkboxes" as="firstCheckbox" />
+      <Click element="firstCheckbox" />
+      <!-- Verify visual indication of completion (e.g., line-through or different style) -->
+      <Locate css="[data-testid='todo-item'].completed" as="completedItem" />
+      <ExpectVisible element="completedItem" expectedState="true" timeout="3000" />
+
+      <!-- Test 5: Delete a todo -->
+      <Locate css="[data-testid='delete-todo']" as="deleteButtons" />
+      <First elements="deleteButtons" as="firstDeleteBtn" />
+      <Click element="firstDeleteBtn" />
+      <!-- Verify item is removed -->
+      <ExpectVisible element="todo1" expectedState="false" timeout="3000" />
+
+      <!-- Verify other item still exists -->
+      <ExpectVisible element="todo2" expectedState="true" timeout="2000" />
+
+      <!-- Delete the remaining item -->
+      <Locate css="[data-testid='delete-todo']" as="remainingDeleteBtns" />
+      <First elements="remainingDeleteBtns" as="lastDeleteBtn" />
+      <Click element="lastDeleteBtn" />
+
+      <!-- Test 6: Empty state -->
+      <Locate text="No todos yet" as="emptyState" />
+      <ExpectVisible element="emptyState" expectedState="true" timeout="3000" />
+
+    </Sequence>
+  </BehaviorTree>
+</root>

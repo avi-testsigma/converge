@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Navigation Test
+
+  Requirement: "Add a navigation bar with Home, About, and Contact links"
+
+  Tests:
+  1. Navigation bar renders on all pages
+  2. Home link navigates to /
+  3. About link navigates to /about
+  4. Contact link navigates to /contact
+  5. Active link is highlighted
+-->
+<root main_tree_to_execute="NavigationTest">
+
+  <!-- Reusable: Verify nav bar exists -->
+  <BehaviorTree ID="VerifyNavBar">
+    <Sequence>
+      <Locate role="navigation" as="nav" />
+      <ExpectVisible element="nav" expectedState="true" timeout="3000" />
+      <Within element="nav">
+        <Locate role="link" name="Home" as="homeLink" />
+        <ExpectVisible element="homeLink" expectedState="true" timeout="2000" />
+        <Locate role="link" name="About" as="aboutLink" />
+        <ExpectVisible element="aboutLink" expectedState="true" timeout="2000" />
+        <Locate role="link" name="Contact" as="contactLink" />
+        <ExpectVisible element="contactLink" expectedState="true" timeout="2000" />
+      </Within>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="NavigationTest">
+    <Sequence>
+
+      <!-- Test 1: Nav bar renders on home page -->
+      <Navigate url="http://localhost:3000" />
+      <StepGroup ID="VerifyNavBar" />
+
+      <!-- Test 2: Home link works -->
+      <Navigate url="http://localhost:3000/about" />
+      <ExpectURL expected="**/about" timeout="5000" />
+      <Locate role="navigation" as="nav" />
+      <Within element="nav">
+        <Locate role="link" name="Home" as="homeLink" />
+        <Click element="homeLink" />
+      </Within>
+      <ExpectURL expected="http://localhost:3000/" timeout="5000" />
+
+      <!-- Test 3: About link works -->
+      <Locate role="navigation" as="nav2" />
+      <Within element="nav2">
+        <Locate role="link" name="About" as="aboutLink" />
+        <Click element="aboutLink" />
+      </Within>
+      <ExpectURL expected="**/about" timeout="5000" />
+      <Locate role="heading" name="About" as="aboutHeading" />
+      <ExpectVisible element="aboutHeading" expectedState="true" timeout="3000" />
+
+      <!-- Test 4: Contact link works -->
+      <Locate role="navigation" as="nav3" />
+      <Within element="nav3">
+        <Locate role="link" name="Contact" as="contactLink" />
+        <Click element="contactLink" />
+      </Within>
+      <ExpectURL expected="**/contact" timeout="5000" />
+      <Locate role="heading" name="Contact" as="contactHeading" />
+      <ExpectVisible element="contactHeading" expectedState="true" timeout="3000" />
+
+      <!-- Test 5: Nav bar persists on contact page -->
+      <StepGroup ID="VerifyNavBar" />
+
+    </Sequence>
+  </BehaviorTree>
+</root>

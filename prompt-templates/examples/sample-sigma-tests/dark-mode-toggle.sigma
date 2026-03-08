@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Dark Mode Toggle Test
+
+  Requirement: "Add a dark mode toggle to the settings page that persists"
+
+  Tests:
+  1. Settings page has a dark mode toggle
+  2. Clicking toggle changes theme
+  3. Theme persists after page reload
+  4. Toggle reflects current theme state
+-->
+<root main_tree_to_execute="DarkModeToggleTest">
+
+  <BehaviorTree ID="DarkModeToggleTest">
+    <Sequence>
+
+      <!-- Navigate to settings -->
+      <Navigate url="http://localhost:3000/settings" />
+      <ExpectURL expected="**/settings" timeout="5000" />
+
+      <!-- Test 1: Toggle exists -->
+      <Locate role="heading" name="Appearance" as="heading" />
+      <ExpectVisible element="heading" expectedState="true" timeout="3000" />
+      <Locate role="switch" name="Dark mode" as="darkModeToggle" />
+      <ExpectVisible element="darkModeToggle" expectedState="true" timeout="2000" />
+
+      <!-- Capture initial state -->
+      <GetAttribute element="darkModeToggle" attribute="aria-checked" outputKey="initialState" />
+
+      <!-- Test 2: Clicking toggle changes theme -->
+      <Click element="darkModeToggle" />
+
+      <!-- Verify the toggle state changed -->
+      <GetAttribute element="darkModeToggle" attribute="aria-checked" outputKey="newState" />
+      <AssertValue actual="${newState}" operator="notEquals" expected="${initialState}" />
+
+      <!-- Verify visual change (e.g., dark class on html/body) -->
+      <EvaluateScript outputKey="hasDarkClass"><![CDATA[
+        return document.documentElement.classList.contains('dark');
+      ]]></EvaluateScript>
+
+      <!-- Test 3: Theme persists after reload -->
+      <GetAttribute element="darkModeToggle" attribute="aria-checked" outputKey="stateBeforeReload" />
+      <Reload />
+      <ExpectURL expected="**/settings" timeout="5000" />
+
+      <!-- Re-locate after reload -->
+      <Locate role="switch" name="Dark mode" as="darkModeToggleAfter" />
+      <GetAttribute element="darkModeToggleAfter" attribute="aria-checked" outputKey="stateAfterReload" />
+      <AssertValue actual="${stateAfterReload}" operator="equals" expected="${stateBeforeReload}" />
+
+      <!-- Test 4: Toggle back to original state -->
+      <Click element="darkModeToggleAfter" />
+      <GetAttribute element="darkModeToggleAfter" attribute="aria-checked" outputKey="revertedState" />
+      <AssertValue actual="${revertedState}" operator="equals" expected="${initialState}" />
+
+    </Sequence>
+  </BehaviorTree>
+</root>

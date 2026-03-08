@@ -93,9 +93,48 @@ pnpm test                 # Run all tests
 - [VS Code Extension](docs/VSCODE_EXTENSION.md) — Extension surfaces, desktop app connection
 - [Claude Plugins](docs/CLAUDE_PLUGINS.md) — Skills, sub-agents, MCP tools
 
+## Quick Start (Phase 1 — CLI Skill)
+
+### 1. Install sigmascript
+
+Add `.npmrc` to your project (or `~/.npmrc`):
+```ini
+@testsigmainc:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT
+```
+
+Then install:
+```bash
+npm install --save-dev @testsigmainc/sigmascript
+```
+
+### 2. Add the skill to Claude Code
+
+```bash
+mkdir -p .claude/skills
+cp -r /path/to/testsigma-converge/packages/claude-plugins/skills/converge-test .claude/skills/converge-test
+```
+
+Claude Code auto-discovers skills from `.claude/skills/` — no configuration needed.
+
+### 3. Use it
+
+```
+/converge-test Add a login page with email/password authentication
+```
+
+Claude will ground your codebase, generate `.sigma` test files from the requirement, run a red check to verify the tests fail, and report what to implement next.
+
+After implementing the feature:
+```
+/converge-test run
+```
+
+See [INSTALL.md](packages/claude-plugins/skills/converge-test/INSTALL.md) for detailed setup.
+
 ## Status
 
-Early development. See [Implementation Plan](docs/MVP.md) for phasing.
+Phase 1 (CLI Skill) in development. See [Implementation Plan](docs/MVP.md) for phasing.
 
 ## License
 

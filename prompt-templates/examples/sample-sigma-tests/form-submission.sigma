@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Contact Form Test
+
+  Requirement: "Add a contact form with name, email, message fields and submission"
+
+  Tests:
+  1. Form renders with all fields
+  2. Validation prevents empty submission
+  3. Email validation catches invalid format
+  4. Successful submission shows confirmation
+  5. Form resets after successful submission
+-->
+<root main_tree_to_execute="ContactFormTest">
+
+  <BehaviorTree ID="ContactFormTest">
+    <Sequence>
+
+      <!-- Navigate to contact page -->
+      <Navigate url="http://localhost:3000/contact" />
+      <ExpectURL expected="**/contact" timeout="5000" />
+
+      <!-- Test 1: Form renders with all fields -->
+      <Locate role="heading" name="Contact Us" as="heading" />
+      <ExpectVisible element="heading" expectedState="true" timeout="3000" />
+      <Locate placeholder="Your name" as="nameInput" />
+      <ExpectVisible element="nameInput" expectedState="true" timeout="2000" />
+      <Locate placeholder="your@email.com" as="emailInput" />
+      <ExpectVisible element="emailInput" expectedState="true" timeout="2000" />
+      <Locate placeholder="Your message" as="messageInput" />
+      <ExpectVisible element="messageInput" expectedState="true" timeout="2000" />
+      <Locate role="button" name="Send Message" as="submitBtn" />
+      <ExpectVisible element="submitBtn" expectedState="true" timeout="2000" />
+
+      <!-- Test 2: Empty submission shows validation errors -->
+      <Click element="submitBtn" />
+      <Locate text="Name is required" as="nameError" />
+      <ExpectVisible element="nameError" expectedState="true" timeout="3000" />
+
+      <!-- Test 3: Invalid email format -->
+      <Fill element="nameInput" text="John Doe" />
+      <Fill element="emailInput" text="not-an-email" />
+      <Fill element="messageInput" text="Hello" />
+      <Click element="submitBtn" />
+      <Locate text="valid email" as="emailError" />
+      <ExpectVisible element="emailError" expectedState="true" timeout="3000" />
+
+      <!-- Test 4: Successful submission -->
+      <Clear element="emailInput" />
+      <Fill element="emailInput" text="john@example.com" />
+      <Click element="submitBtn" />
+      <Locate text="Message sent" as="successMsg" />
+      <ExpectVisible element="successMsg" expectedState="true" timeout="5000" />
+
+      <!-- Test 5: Form resets after success -->
+      <GetValue element="nameInput" outputKey="nameAfterSubmit" />
+      <AssertValue actual="${nameAfterSubmit}" operator="equals" expected="" />
+
+    </Sequence>
+  </BehaviorTree>
+</root>
